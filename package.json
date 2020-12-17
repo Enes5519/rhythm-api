@@ -1,0 +1,15 @@
+{
+  "name": "rhythm",
+  "version": "1.0.0",
+  "description": "Youtube Extractor API",
+  "main": "index.js",
+  "keywords": [
+    "youtube",
+    "extractor"
+  ],
+  "author": "Enes5519",
+  "dependencies": {
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.1"
+  }
+}
