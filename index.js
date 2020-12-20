@@ -23,11 +23,11 @@ app.get("/api/list", (req, res) => {
 
 app.get("/api/download", (req, res) => {
     get_audio_url(req.query.video_id)
-        .then(x => res.send(x))
+        .then(x => res.json(x))
         .catch(e => res.send(e));
 })
 
-const port = process.env.PORT || 8080 // 8080
+const port = process.env.PORT || 5519 // 8080
 app.listen(port, function () {
     console.log('Listening on port ' + port);
 });

@@ -1,4 +1,5 @@
 const fetch = require("node-fetch")
+var mime = require('mime-types')
 const baseURL = 'https://www.youtube.com'
 const videoPageURL = baseURL + '/watch?v='
 const videoDetailsBaseURL = baseURL + '/get_video_info?&asv=3&el=detailpage&hl=en_US&video_id='
@@ -10,7 +11,7 @@ const getAudioUrl = async (id) => {
     }
 
     if(!format.hasCipher){
-        return format.value
+        return {url: format.value, extension: mime.extension(format.mimeType)}
     }
 
     try{
@@ -43,7 +44,7 @@ const getAudioUrl = async (id) => {
             }
         })
 
-        return cipher.url + "&sig=" + signature.join("")
+        return {url: cipher.url + "&sig=" + signature.join(""), extension: mime.extension(format.mimeType)}
     }catch (e) {
         console.log("Failed fetch", e)
 
@@ -86,7 +87,7 @@ const getAudioFormat = async (video_id) => {
         if (adaptiveFormats.length !== 0) {
             let maxAudioBitrate = null;
             adaptiveFormats.forEach(value => {
-                if (value.audioQuality) {
+                if (value.audioQuality && mime.extension(value.mimeType) !== "weba") {
                     if (maxAudioBitrate === null || value.bitrate > maxAudioBitrate.bitrate) {
                         maxAudioBitrate = value
                     }
@@ -94,7 +95,7 @@ const getAudioFormat = async (video_id) => {
             })
 
             const hasCipher = Boolean(maxAudioBitrate.signatureCipher)
-            return {hasCipher: hasCipher, value: hasCipher ? maxAudioBitrate.signatureCipher : maxAudioBitrate.url}
+            return {hasCipher: hasCipher, value: hasCipher ? maxAudioBitrate.signatureCipher : maxAudioBitrate.url, mimeType: maxAudioBitrate.mimeType}
         }
 
         return null
