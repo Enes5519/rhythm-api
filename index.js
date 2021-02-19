@@ -1,35 +1,47 @@
-const express = require("express")
-const app = express()
+const express = require('express');
+const app = express();
 
-const get_video_list = require("./list/get-video-list")
-const get_audio_url = require("./list/get-audio-url")
-const search_suggests = require("./list/search-suggests")
+const get_video_list = require('./list/get-video-list');
+const get_audio_url = require('./list/get-audio-url');
+const search_suggests = require('./list/search-suggests');
 
-app.get("/", (req, res) => {
-    res.sendFile(__dirname + "/index.html")
-})
+const errorResponse = (status, error) => ({ status, error });
+const sendResponse = (req, res) =>
+  req
+    .then((data) => res.json({ ...data, status: 200 }))
+    .catch((e) => res.json(errorResponse(502, e)));
 
-app.get("/api/suggest", (req, res) => {
-    search_suggests(req.query.keyword)
-        .then(x => res.json(x))
-        .catch(e => res.send(e));
-})
-
-app.get("/api/list", (req, res) => {
-    get_video_list(req.query.keyword)
-        .then(x => res.json(x))
-        .catch(e => res.send(e));
-})
-
-app.get("/api/download", (req, res) => {
-    get_audio_url(req.query.video_id)
-        .then(x => res.json(x))
-        .catch(e => res.send(e));
-})
-
-const port = process.env.PORT || 8080 // 8080
-app.listen(port, function () {
-    console.log('Listening on port ' + port);
+app.get('/', (_req, res) => {
+  res.sendFile(__dirname + '/index.html');
 });
 
-module.exports = app
+app.get('/api/suggest', (req, res) => {
+  if (req.query.keyword) {
+    sendResponse(search_suggests(req.query.keyword), res);
+  } else {
+    res.json(errorResponse(400, 'You have to specify keyword.'));
+  }
+});
+
+app.get('/api/list', (req, res) => {
+  if (req.query.keyword) {
+    sendResponse(get_video_list(req.query.keyword), res);
+  } else {
+    res.json(errorResponse(400, 'You have to specify keyword.'));
+  }
+});
+
+app.get('/api/download', (req, res) => {
+  if (req.query.video_id) {
+    sendResponse(get_audio_url(req.query.video_id), res);
+  } else {
+    res.json(errorResponse(400, 'You have to specify video_id.'));
+  }
+});
+
+const port = process.env.PORT || 8080; // 8080
+app.listen(port, function () {
+  console.log('Listening on port ' + port);
+});
+
+module.exports = app;

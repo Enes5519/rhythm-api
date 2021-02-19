@@ -3,7 +3,8 @@ const baseURL = "http://www.google.com/complete/search?client=firefox&ds=yt&hl=t
 
 const searchSuggest = async (keyword) => {
     const response = await fetch(baseURL + encodeURIComponent(keyword), {headers: {"content-type": "application/json; charset=utf-8"}})
-    return response.json()
+    const json = await response.json();
+    return {suggests: json[1]};
 }
 
 module.exports = searchSuggest
