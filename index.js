@@ -1,9 +1,9 @@
 const express = require('express');
 const app = express();
 
-const get_video_list = require('./list/get-video-list');
-const get_audio_url = require('./list/get-audio-url');
-const search_suggests = require('./list/search-suggests');
+const get_video_list = require('./api/get-video-list');
+const get_audio_url = require('./api/get-audio-url');
+const search_suggests = require('./api/search-suggests');
 
 const errorResponse = (status, error) => ({ status, error });
 const sendResponse = (req, res) =>
