@@ -15,7 +15,7 @@ app.get('/', (_req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-app.get('/api/suggest', (req, res) => {
+app.get('/suggest', (req, res) => {
   if (req.query.keyword) {
     sendResponse(search_suggests(req.query.keyword), res);
   } else {
@@ -23,7 +23,7 @@ app.get('/api/suggest', (req, res) => {
   }
 });
 
-app.get('/api/list', (req, res) => {
+app.get('/list', (req, res) => {
   if (req.query.keyword) {
     sendResponse(get_video_list(req.query.keyword), res);
   } else {
@@ -31,7 +31,7 @@ app.get('/api/list', (req, res) => {
   }
 });
 
-app.get('/api/download', (req, res) => {
+app.get('/download', (req, res) => {
   if (req.query.video_id) {
     sendResponse(get_audio_url(req.query.video_id), res);
   } else {
