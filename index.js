@@ -1,23 +1,37 @@
 const express = require('express');
 const app = express();
+const youtube = require('youtube-extractor');
+const mime = require('mime-types');
 
-const get_video_list = require('./api/get-video-list');
-const get_audio_url = require('./api/get-audio-url');
-const search_suggests = require('./api/search-suggests');
+async function getMaxAudioBitrateFormat(video_id){
+  const formats = await youtube.get_video_formats(video_id);
+
+  let maxAudioBitrateFormat = null;
+  for (const format of formats) {
+    if(format.mimeType.startsWith('audio') && mime.extension(format.mimeType) !== 'weba'){
+      if(maxAudioBitrateFormat === null){
+        maxAudioBitrateFormat = format;
+      }else if(maxAudioBitrateFormat.bitrate < format.bitrate){
+        maxAudioBitrateFormat = format;
+      }
+    }
+  }
+
+  return {url: await maxAudioBitrateFormat.downloadURL(), extension: mime.extension(maxAudioBitrateFormat.mimeType)};
+}
 
 const errorResponse = (status, error) => ({ status, error });
-const sendResponse = (req, res) =>
-  req
-    .then((data) => res.json({ ...data, status: 200 }))
-    .catch((e) => res.json(errorResponse(502, e)));
 
 app.get('/', (_req, res) => {
-  res.sendFile(__dirname + '/index.html');
+  res.sendFile(__dirname + '/index.html');  
 });
 
 app.get('/suggest', (req, res) => {
   if (req.query.keyword) {
-    sendResponse(search_suggests(req.query.keyword), res);
+    youtube
+      .search_suggests(req.query.keyword)
+      .then((suggests) => res.json({ suggests, status: 200 }))
+      .catch((e) => res.json(errorResponse(502, e)));
   } else {
     res.json(errorResponse(400, 'You have to specify keyword.'));
   }
@@ -25,7 +39,10 @@ app.get('/suggest', (req, res) => {
 
 app.get('/list', (req, res) => {
   if (req.query.keyword) {
-    sendResponse(get_video_list(req.query.keyword), res);
+    youtube
+      .search_results(req.query.keyword)
+      .then((list) => res.json({ list, status: 200 }))
+      .catch((e) => res.json(errorResponse(502, e)));
   } else {
     res.json(errorResponse(400, 'You have to specify keyword.'));
   }
@@ -33,7 +50,9 @@ app.get('/list', (req, res) => {
 
 app.get('/download', (req, res) => {
   if (req.query.video_id) {
-    sendResponse(get_audio_url(req.query.video_id), res);
+    getMaxAudioBitrateFormat(req.query.video_id)
+    .then((value) => res.json({ ...value, status: 200 }))
+      .catch((e) => res.json(errorResponse(502, e)));
   } else {
     res.json(errorResponse(400, 'You have to specify video_id.'));
   }

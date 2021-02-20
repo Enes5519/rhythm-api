@@ -1,5 +1,5 @@
 # rhythm-api
-rhyrhm-api is a youtube extractor api. With this API, you can get search suggestions, video lists, and download those videos.
+rhythm-api is a youtube extractor api server. rhythm-api uses [youtube-extractor](https://github.com/Enes5519/youtube-extractor).
 
 ## APIs
 ### /suggest
